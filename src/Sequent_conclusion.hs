@@ -1,34 +1,16 @@
 {-# LANGUAGE LambdaCase #-}
-module Sequent_conclusion where
+module Sequent_conclusion(result) where
+
 import Control.Monad
 import Data.List
 import System.Process -- add "process" package in dependencies
 
+import AST
+import Parser
 {-
   This program works on Ubuntu 18.04, GraphViz 2.40.1
 -}
 
-data Sequent = Turnstile [Formula] [Formula]
-  deriving (Eq)
-
-instance Show Sequent where
-  show (Turnstile xls xrs) = show xls ++ "⊢" ++ show xrs
-
-data Formula = Var String
-             | Not Formula
-             | And Formula Formula
-             | Or Formula Formula
-             | Impl Formula Formula
-  deriving (Eq)
-
-instance Show Formula where
-  show (Var name) = name
-  show (Not formula) = "(¬" ++ show formula ++ ")"
-  show (And formulal formular) = "(" ++ show formulal ++ "∧" ++ show formular ++ ")"
-  show (Or formulal formular) = "(" ++ show formulal ++ "∨" ++ show formular ++ ")"
-  show (Impl formulal formular) = "(" ++ show formulal ++ "→" ++ show formular ++ ")"
-
-type Log = String
 
 {-
   Checks if all formulas in a Sequent are variables.
@@ -106,31 +88,34 @@ cntrEx (Turnstile xls xrs) = "True: " ++ concatMap show xls ++ "; False: " ++ co
   If the Sequent is not valid, then a message about this, a counterexample and a graph, is displayed.
   Bold arrows indicate a branch to leaf with a counterexample.
 -}
-main :: Sequent -> IO()
-main s = case checkValidList (checker (s,"")) of
-               Right (str, logs) -> do
+resultBuilder :: Sequent -> IO()
+resultBuilder s = case checkValidList (checker (s,"")) of
+                    Right (str, logs) -> do
                                     writeFile "result.dot" validStr
                                     system "dot -Tpdf result.dot -o result.pdf"
                                     putStrLn "See result in result.pdf"
-                where
-                  validStr :: String
-                  validStr = "strict digraph G {\n\tnode[shape=\"rectangle\", style=rounded]\n\tlabel = \"" ++ str ++ "\"\n\tlabelloc = top" ++ unlinetab logs ++ "\n }"
+                        where
+                          validStr :: String
+                          validStr = "strict digraph G {\n\tnode[shape=\"rectangle\", style=rounded]\n\tlabel = \"" ++ str ++ "\"\n\tlabelloc = top" ++ unlinetab logs ++ "\n }"
 
-                  unlinetab :: [Log] -> String
-                  unlinetab [] = []
-                  unlinetab (x:xs) = "\n\t" ++ x ++ unlinetab xs
-               Left ((str, cntr), logs) -> do
+                          unlinetab :: [Log] -> String
+                          unlinetab [] = []
+                          unlinetab (x:xs) = "\n\t" ++ x ++ unlinetab xs
+                    Left ((str, cntr), logs) -> do
                                            writeFile "result.dot" notValidStr
                                            system "dot -Tpdf result.dot -o result.pdf"
                                            putStrLn "See result in result.pdf"
-                where
-                  notValidStr :: String
-                  notValidStr = "strict digraph G {\n\tnode[shape=\"rectangle\", style=rounded]\n\t label = \"" ++ str ++ "\"\n\t labelloc = top" ++ unlinetab logs cntr ++ "\n }"
+                        where
+                          notValidStr :: String
+                          notValidStr = "strict digraph G {\n\tnode[shape=\"rectangle\", style=rounded]\n\t label = \"" ++ str ++ "\"\n\t labelloc = top" ++ unlinetab logs cntr ++ "\n }"
 
-                  unlinetab :: [Log] -> Log -> String
-                  unlinetab [] str = []
-                  unlinetab (x:xs) str | x == str = "\n\t" ++ x ++ " [penwidth = 5]" ++ unlinetab xs str
-                                       | otherwise = "\n\t" ++ x ++ unlinetab xs str
+                          unlinetab :: [Log] -> Log -> String
+                          unlinetab [] str = []
+                          unlinetab (x:xs) str | x == str = "\n\t" ++ x ++ " [penwidth = 5]" ++ unlinetab xs str
+                                               | otherwise = "\n\t" ++ x ++ unlinetab xs str
+
+result :: String -> IO ()
+result = resultBuilder.parseString
 
 --Tests for the introduction of rules succedent
 test1 = Turnstile [] [Var "a"]
