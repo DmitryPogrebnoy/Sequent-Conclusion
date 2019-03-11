@@ -1,4 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
 module AST where
+
+import Data.String
+import Data.Text
 
 data Sequent = Turnstile [Formula] [Formula]
   deriving (Eq)
@@ -20,4 +24,4 @@ instance Show Formula where
   show (Or formulal formular) = "(" ++ show formulal ++ "∨" ++ show formular ++ ")"
   show (Impl formulal formular) = "(" ++ show formulal ++ "→" ++ show formular ++ ")"
 
-type Log = String
+type Log = Text

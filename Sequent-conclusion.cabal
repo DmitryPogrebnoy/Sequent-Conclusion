@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2ec463fb071932fb7561b051f8e22675c5ecb6c9e25371c2302fd396f633935e
+-- hash: d755119995c792380f49cfe1827eb4d032d96ccd64556f2913598cb86bb89f6e
 
 name:           Sequent-conclusion
 version:        0.1.0.0
@@ -38,6 +38,7 @@ library
       base >=4.7 && <5
     , parsec
     , process
+    , text
   default-language: Haskell2010
 
 executable Sequent-conclusion-exe
@@ -52,6 +53,7 @@ executable Sequent-conclusion-exe
     , base >=4.7 && <5
     , parsec
     , process
+    , text
   default-language: Haskell2010
 
 test-suite Sequent-conclusion-test
@@ -67,4 +69,5 @@ test-suite Sequent-conclusion-test
     , base >=4.7 && <5
     , parsec
     , process
+    , text
   default-language: Haskell2010
